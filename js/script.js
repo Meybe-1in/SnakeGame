@@ -1,25 +1,49 @@
 
 const playBoard = document.querySelector(".play-board");
+const scoreElement = document.querySelector(".score");
+const highScoreElement = document.querySelector(".high-score");
+
 let foodX, foodY ;
 let snakeBody = [];
 let snakeX = 5, snakeY= 10;
 let velocityX=0 , velocityY=0;
 let gameOver = false;
 let setIntervalId;
+let score = 0;
+let highScore= localStorage.getItem("high-score") || 0;
+highScoreElement.innerHTML = `High Score: ${highScore}`;
+        
 
 const changeFoodPosition = () => {
     // passing a random 0 - 30 value as food position
-    foodX = Math.floor(Math.random() * 30) + 1;
-    foodY = Math.floor(Math.random() * 30) + 1;
+    foodX = Math.floor(Math.random() * 15) + 1;
+    foodY = Math.floor(Math.random() * 15) + 1;
     
 }
+
 
 const handleGameOver = () => {
     // clearing the timer and reloading the page on game over
 
     clearInterval(setIntervalId);
-    alert (" Game Over! Pres Ok to replay ...");
-    location.reload();
+    (async () => {
+    const { value: accept } = await Swal.fire({
+        icon: 'error',
+        title: 'Game Over!',
+        text: 'Pres Ok to replay ...',
+        allowOutsideClick: false,
+        customClass:{
+            confirmButton:'swal-button',
+        },
+
+        inputValidator: (result) => {
+          }
+
+      })
+      if (accept) {
+        location.reload();
+      }
+    })()
 }
 
 const changeDirecction = (e) =>{
@@ -51,7 +75,13 @@ const initGame = () => {
     if (snakeX === foodX && snakeY === foodY) {
         changeFoodPosition();
         snakeBody.push([foodX,foodY]); //pushing food position to shake body array
-        console.log(snakeBody);
+        score++;
+
+        highScore = score >= highScore ? score : highScore;
+        localStorage.setItem("high-score", highScore);
+        scoreElement.innerHTML = `Score: ${score}`;
+        highScoreElement.innerHTML = `High Score: ${highScore}`;
+        
     }
 
     for (let i = snakeBody.length -1 ; i > 0 ; i--) {
@@ -65,7 +95,7 @@ const initGame = () => {
     snakeX +=velocityX;
     snakeY +=velocityY;
 
-    if (snakeX <= 0 || snakeX > 30 || snakeY <= 0 || snakeY > 30){
+    if (snakeX <= 0 || snakeX > 15 || snakeY <= 0 || snakeY > 15){
         gameOver = true;
     }
     
